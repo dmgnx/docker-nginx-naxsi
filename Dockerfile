@@ -8,6 +8,8 @@ ENV NAXSI_VERSION=0.55.3 \
     NGINX_MAINLINE_VERSION=1.11.13 \
     NGINX_STABLE_VERSION=1.12.0
 
+COPY ./docker-entrypoint.sh /docker-entrypoint.sh
+
 RUN set -ex ; \
     if test "x$branch" = "xmainline" ; \
     then \
@@ -140,7 +142,7 @@ RUN set -ex ; \
 			| xargs -r apk info --installed \
 			| sort -u \
 	)" \
-	&& apk add --no-cache --virtual .nginx-rundeps $runDeps \
+	&& apk add --no-cache --virtual .nginx-run-deps $runDeps \
 	&& apk del .build-deps \
 	&& apk del .gettext \
 	&& mv /tmp/envsubst /usr/local/bin/ \
@@ -156,4 +158,5 @@ EXPOSE 80
 
 STOPSIGNAL SIGQUIT
 
-CMD ["nginx", "-g", "daemon off;"]
+ENTRYPOINT [ "/docker-entrypoint.sh" ]
+CMD [ "-g", "daemon off;" ]

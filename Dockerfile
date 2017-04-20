@@ -1,10 +1,11 @@
 FROM alpine:3.5
 
-MAINTAINER NGINX Docker Maintainers "docker-maint@nginx.com"
+LABEL maintainer "Dimitri G. <dev@dmgnx.net>"
 
 ARG branch="stable"
 
-ENV NGINX_MAINLINE_VERSION=1.11.13 \
+ENV NAXSI_VERSION=0.55.3 \
+    NGINX_MAINLINE_VERSION=1.11.13 \
     NGINX_STABLE_VERSION=1.12.0
 
 RUN set -ex ; \

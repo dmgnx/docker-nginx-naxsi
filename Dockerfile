@@ -2,9 +2,24 @@ FROM alpine:3.5
 
 MAINTAINER NGINX Docker Maintainers "docker-maint@nginx.com"
 
-ENV NGINX_VERSION 1.11.13
+ARG branch="stable"
 
-RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
+ENV NGINX_MAINLINE_VERSION=1.11.13 \
+    NGINX_STABLE_VERSION=1.12.0
+
+RUN set -ex ; \
+    if test "x$branch" = "xmainline" ; \
+    then \
+        nginx_version=$NGINX_MAINLINE_VERSION ; \
+    elif test "x$branch" = "xstable" ; \
+    then \
+        nginx_version=$NGINX_STABLE_VERSION ; \
+    else \
+        >&2 echo "Error: unknown branch."  ; \
+        exit 1 ; \
+    fi ; \
+    \        
+    GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
 	&& CONFIG="\
 		--prefix=/etc/nginx \
 		--sbin-path=/usr/sbin/nginx \
@@ -65,8 +80,8 @@ RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
 		libxslt-dev \
 		gd-dev \
 		geoip-dev \
-	&& curl -fSL http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz -o nginx.tar.gz \
-	&& curl -fSL http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz.asc  -o nginx.tar.gz.asc \
+	&& curl -fSL http://nginx.org/download/nginx-$nginx_version.tar.gz -o nginx.tar.gz \
+	&& curl -fSL http://nginx.org/download/nginx-$nginx_version.tar.gz.asc  -o nginx.tar.gz.asc \
 	&& export GNUPGHOME="$(mktemp -d)" \
 	&& found=''; \
 	for server in \
@@ -84,7 +99,7 @@ RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
 	&& mkdir -p /usr/src \
 	&& tar -zxC /usr/src -f nginx.tar.gz \
 	&& rm nginx.tar.gz \
-	&& cd /usr/src/nginx-$NGINX_VERSION \
+	&& cd /usr/src/nginx-$nginx_version \
 	&& ./configure $CONFIG --with-debug \
 	&& make -j$(getconf _NPROCESSORS_ONLN) \
 	&& mv objs/nginx objs/nginx-debug \
@@ -108,7 +123,7 @@ RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
 	&& ln -s ../../usr/lib/nginx/modules /etc/nginx/modules \
 	&& strip /usr/sbin/nginx* \
 	&& strip /usr/lib/nginx/modules/*.so \
-	&& rm -rf /usr/src/nginx-$NGINX_VERSION \
+	&& rm -rf /usr/src/nginx-$nginx_version \
 	\
 	# Bring in gettext so we can get `envsubst`, then throw
 	# the rest away. To do this, we need to install `gettext`

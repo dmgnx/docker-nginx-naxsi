@@ -22,8 +22,12 @@ RUN set -ex ; \
         exit 1 ; \
     fi ; \
     \        
-    GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
-	&& CONFIG="\
+    gpg_keys=" \
+        0xB0F4253373F8F6F510D42178520A9993A1C052F8 \
+        251A28DE2685AED4 \
+        " \
+    ; \
+    config=" \
 		--prefix=/etc/nginx \
 		--sbin-path=/usr/sbin/nginx \
 		--modules-path=/usr/lib/nginx/modules \
@@ -39,6 +43,7 @@ RUN set -ex ; \
 		--http-scgi-temp-path=/var/cache/nginx/scgi_temp \
 		--user=nginx \
 		--group=nginx \
+        --add-module=/tmp/naxsi-$NAXSI_VERSION/naxsi_src/ \
 		--with-http_ssl_module \
 		--with-http_realip_module \
 		--with-http_addition_module \
@@ -67,10 +72,20 @@ RUN set -ex ; \
 		--with-compat \
 		--with-file-aio \
 		--with-http_v2_module \
-	" \
-	&& addgroup -S nginx \
-	&& adduser -D -S -h /var/cache/nginx -s /sbin/nologin -G nginx nginx \
-	&& apk add --no-cache --virtual .build-deps \
+	    " \
+    ; \
+    \
+	addgroup -S nginx ; \
+	adduser \
+        -D \
+        -S \
+        -h /var/cache/nginx \
+        -s /sbin/nologin \
+        -G nginx \
+        nginx \
+    ; \
+    \
+	apk add --no-cache --virtual .build-deps \
 		gcc \
 		libc-dev \
 		make \
@@ -83,76 +98,99 @@ RUN set -ex ; \
 		libxslt-dev \
 		gd-dev \
 		geoip-dev \
-	&& curl -fSL http://nginx.org/download/nginx-$nginx_version.tar.gz -o nginx.tar.gz \
-	&& curl -fSL http://nginx.org/download/nginx-$nginx_version.tar.gz.asc  -o nginx.tar.gz.asc \
-	&& export GNUPGHOME="$(mktemp -d)" \
-	&& found=''; \
-	for server in \
-		ha.pool.sks-keyservers.net \
-		hkp://keyserver.ubuntu.com:80 \
-		hkp://p80.pool.sks-keyservers.net:80 \
-		pgp.mit.edu \
-	; do \
-		echo "Fetching GPG key $GPG_KEYS from $server"; \
-		gpg --keyserver "$server" --keyserver-options timeout=10 --recv-keys "$GPG_KEYS" && found=yes && break; \
-	done; \
-	test -z "$found" && echo >&2 "error: failed to fetch GPG key $GPG_KEYS" && exit 1; \
-	gpg --batch --verify nginx.tar.gz.asc nginx.tar.gz \
-	&& rm -r "$GNUPGHOME" nginx.tar.gz.asc \
-	&& mkdir -p /usr/src \
-	&& tar -zxC /usr/src -f nginx.tar.gz \
-	&& rm nginx.tar.gz \
-	&& cd /usr/src/nginx-$nginx_version \
-	&& ./configure $CONFIG --with-debug \
-	&& make -j$(getconf _NPROCESSORS_ONLN) \
-	&& mv objs/nginx objs/nginx-debug \
-	&& mv objs/ngx_http_xslt_filter_module.so objs/ngx_http_xslt_filter_module-debug.so \
-	&& mv objs/ngx_http_image_filter_module.so objs/ngx_http_image_filter_module-debug.so \
-	&& mv objs/ngx_http_geoip_module.so objs/ngx_http_geoip_module-debug.so \
-	&& mv objs/ngx_stream_geoip_module.so objs/ngx_stream_geoip_module-debug.so \
-	&& ./configure $CONFIG \
-	&& make -j$(getconf _NPROCESSORS_ONLN) \
-	&& make install \
-	&& rm -rf /etc/nginx/html/ \
-	&& mkdir /etc/nginx/conf.d/ \
-	&& mkdir -p /usr/share/nginx/html/ \
-	&& install -m644 html/index.html /usr/share/nginx/html/ \
-	&& install -m644 html/50x.html /usr/share/nginx/html/ \
-	&& install -m755 objs/nginx-debug /usr/sbin/nginx-debug \
-	&& install -m755 objs/ngx_http_xslt_filter_module-debug.so /usr/lib/nginx/modules/ngx_http_xslt_filter_module-debug.so \
-	&& install -m755 objs/ngx_http_image_filter_module-debug.so /usr/lib/nginx/modules/ngx_http_image_filter_module-debug.so \
-	&& install -m755 objs/ngx_http_geoip_module-debug.so /usr/lib/nginx/modules/ngx_http_geoip_module-debug.so \
-	&& install -m755 objs/ngx_stream_geoip_module-debug.so /usr/lib/nginx/modules/ngx_stream_geoip_module-debug.so \
-	&& ln -s ../../usr/lib/nginx/modules /etc/nginx/modules \
-	&& strip /usr/sbin/nginx* \
-	&& strip /usr/lib/nginx/modules/*.so \
-	&& rm -rf /usr/src/nginx-$nginx_version \
+    ; \
+    \
+    cd /tmp ; \
+	curl \
+        -fSL \
+        http://nginx.org/download/nginx-$nginx_version.tar.gz \
+        -o nginx.tar.gz \
+    ; \
+	curl \
+        -fSL \
+        http://nginx.org/download/nginx-$nginx_version.tar.gz.asc \
+        -o nginx.tar.gz.asc \
+    ; \
+    curl \
+        -fSL \
+        https://github.com/nbs-system/naxsi/archive/$NAXSI_VERSION.tar.gz \
+        -o naxsi.tar.gz \
+    ; \
+	curl \
+        -fSL \
+        https://github.com/nbs-system/naxsi/releases/download/$NAXSI_VERSION/naxsi-$NAXSI_VERSION.tar.gz.asc \
+        -o naxsi.tar.gz.asc \
+    ; \
 	\
-	# Bring in gettext so we can get `envsubst`, then throw
-	# the rest away. To do this, we need to install `gettext`
-	# then move `envsubst` out of the way so `gettext` can
-	# be deleted completely, then move `envsubst` back.
-	&& apk add --no-cache --virtual .gettext gettext \
-	&& mv /usr/bin/envsubst /tmp/ \
+    export GNUPGHOME="$(mktemp -d)" ; \
+	gpg \
+        --keyserver "pgp.mit.edu" \
+        --keyserver-options timeout=10 \
+        --recv-keys $gpg_keys \
+    ; \
+	gpg --batch --verify nginx.tar.gz.asc nginx.tar.gz ; \
+	gpg --batch --verify naxsi.tar.gz.asc naxsi.tar.gz ; \
+	rm -r \
+        "$GNUPGHOME" \
+        naxsi.tar.gz.asc \
+        nginx.tar.gz.asc \
+    ; \
+    \
+    tar -xzf naxsi.tar.gz ; \
+    tar -xzf nginx.tar.gz ; \
+	rm \
+        naxsi.tar.gz \
+        nginx.tar.gz \
+    ; \
+    \
+	cd /tmp/nginx-$nginx_version ; \
+	./configure $config ; \
+	make -j$(getconf _NPROCESSORS_ONLN) ; \
+	make install ; \
+	rm -rf /etc/nginx/html/ ; \
+	mkdir /etc/nginx/conf.d/ ; \
+	mkdir -p /usr/share/nginx/html/ ; \
+	install -m644 \
+        ../naxsi-$NAXSI_VERSION/naxsi_config/naxsi_core.rules \
+        /etc/nginx \
+    ; \
+	install -m644 html/index.html /usr/share/nginx/html/ ; \
+	install -m644 html/50x.html /usr/share/nginx/html/ ; \
+	ln -s ../../usr/lib/nginx/modules /etc/nginx/modules ; \
+	strip /usr/sbin/nginx* ; \
+	strip /usr/lib/nginx/modules/*.so ; \
+	rm -rf \
+        /tmp/naxsi-$NAXSI_VERSION \
+        /tmp/nginx-$nginx_version \
+    ; \
 	\
-	&& runDeps="$( \
-		scanelf --needed --nobanner /usr/sbin/nginx /usr/lib/nginx/modules/*.so /tmp/envsubst \
+	apk add --no-cache --virtual .build-deps gettext ; \
+	mv /usr/bin/envsubst /tmp/ ; \
+	\
+	run_deps="$( \
+		scanelf \
+                --needed \
+                --nobanner \
+                /usr/sbin/nginx \
+                /usr/lib/nginx/modules/*.so \
+                /tmp/envsubst \
 			| awk '{ gsub(/,/, "\nso:", $2); print "so:" $2 }' \
 			| sort -u \
 			| xargs -r apk info --installed \
 			| sort -u \
-	)" \
-	&& apk add --no-cache --virtual .nginx-run-deps $runDeps \
-	&& apk del .build-deps \
-	&& apk del .gettext \
-	&& mv /tmp/envsubst /usr/local/bin/ \
+	    )" \
+    ; \
+	apk add --no-cache --virtual .nginx-run-deps $run_deps ; \
+	apk del .build-deps ; \
+	mv /tmp/envsubst /usr/local/bin/ ; \
 	\
-	# forward request and error logs to docker log collector
-	&& ln -sf /dev/stdout /var/log/nginx/access.log \
-	&& ln -sf /dev/stderr /var/log/nginx/error.log
+	ln -sf /dev/stdout /var/log/nginx/access.log ; \
+	ln -sf /dev/stderr /var/log/nginx/error.log ;
 
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY nginx.vh.default.conf /etc/nginx/conf.d/default.conf
+
+VOLUME [ "/etc/nginx/conf.d", "/usr/share/nginx/html" ]
 
 EXPOSE 80
 

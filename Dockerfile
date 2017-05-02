@@ -2,7 +2,7 @@ FROM alpine:3.5
 
 LABEL maintainer "Dimitri G. <dev@dmgnx.net>"
 
-ARG branch="stable"
+ARG branch="mainline"
 
 ENV NAXSI_VERSION=0.55.3 \
     NGINX_MAINLINE_VERSION=1.13.0 \
@@ -190,9 +190,13 @@ RUN set -ex ; \
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY nginx.vh.default.conf /etc/nginx/conf.d/default.conf
 
-VOLUME [ "/etc/nginx/conf.d", "/usr/share/nginx/html" ]
+VOLUME "/etc/nginx/conf.d" \
+       "/etc/nginx/naxsi" \
+       "/etc/nginx/ssl" \
+       "/usr/share/nginx/html" \
+       "/var/log/nginx"
 
-EXPOSE 80
+EXPOSE 80/tcp 443/tcp
 
 STOPSIGNAL SIGQUIT
 

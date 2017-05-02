@@ -5,8 +5,7 @@ LABEL maintainer "Dimitri G. <dev@dmgnx.net>"
 ARG branch="mainline"
 
 ENV NAXSI_VERSION=0.55.3 \
-    NGINX_MAINLINE_VERSION=1.13.0 \
-    NGINX_STABLE_VERSION=1.12.0
+    NGINX_VERSION=@NGINX_VERSION@
 
 COPY ./docker-entrypoint.sh /docker-entrypoint.sh
 

@@ -22,17 +22,23 @@ NGINX_STABLE_VERSION=$(shell \
 
 .PHONY:mainline stable
 
-mainline:
+mainline: Dockerfile
 	sed \
 			's/@NGINX_VERSION@/$(NGINX_MAINLINE_VERSION)/' \
-			Dockerfile \
-		> mainline/Dockerfile
+			$< \
+		> $@/$<
+	cp docker-entrypoint.sh $@
+	cp nginx.conf $@
+	cp nginx.vh.default.conf $@
 
-stable:
+stable: Dockerfile
 	sed \
 			's/@NGINX_VERSION@/$(NGINX_STABLE_VERSION)/' \
-			Dockerfile \
-		> stable/Dockerfile
+			$< \
+		> $@/$<
+	cp docker-entrypoint.sh $@
+	cp nginx.conf $@
+	cp nginx.vh.default.conf $@
 
 update-naxsi:
 	sed -i \

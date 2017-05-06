@@ -1,9 +1,22 @@
-# About this Repo
+# Supported tags and respective `Dockerfile` links
 
-This is the Git repo of the official Docker image for [nginx](https://registry.hub.docker.com/_/nginx/). See the
-Hub page for the full readme on how to use the Docker image and for information
-regarding contributing and issues.
+-   [`1.13.0`, `1.13`, `mainline`, `latest` (*mainline/Dockerfile*)](https://github.com/dmgnx/docker-nginx-naxsi/blob/master/mainline/Dockerfile)
+-   [`1.12.0`, `1.12`, `stable` (*stable/Dockerfile*)](https://github.com/dmgnx/docker-nginx-naxsi/blob/master/stable/Dockerfile)
 
-The full readme is generated over in [docker-library/docs](https://github.com/docker-library/docs),
-specificially in [docker-library/docs/nginx](https://github.com/docker-library/docs/tree/master/nginx).
+# How to use this image
+
+```console
+$ docker run --name nginx-naxsi -p 80:80 \
+    -v $(pwd):/usr/share/nginx/html -d dmgnx/nginx-naxsi
+```
+
+This will start a nginx service with default configuration, serving current working directory as you website.
+
+# Volumes
+
+-   /etc/nginx/conf.d : virtual hosts configuration
+-   /etc/nginx/naxsi : your Naxsi rules
+-   /etc/nginx/ssl : SSL certificates
+-   /usr/share/nginx/html : web root directory
+-   /var/log/nginx : log storage (default redirecting it to standard outputs)
 

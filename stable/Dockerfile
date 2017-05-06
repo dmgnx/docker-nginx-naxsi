@@ -2,25 +2,12 @@ FROM alpine:3.5
 
 LABEL maintainer "Dimitri G. <dev@dmgnx.net>"
 
-ARG branch="mainline"
+COPY ./docker-entrypoint.sh /docker-entrypoint.sh
 
 ENV NAXSI_VERSION=0.55.3 \
     NGINX_VERSION=1.12.0
 
-COPY ./docker-entrypoint.sh /docker-entrypoint.sh
-
 RUN set -ex ; \
-    if test "x$branch" = "xmainline" ; \
-    then \
-        nginx_version=$NGINX_MAINLINE_VERSION ; \
-    elif test "x$branch" = "xstable" ; \
-    then \
-        nginx_version=$NGINX_STABLE_VERSION ; \
-    else \
-        >&2 echo "Error: unknown branch."  ; \
-        exit 1 ; \
-    fi ; \
-    \        
     gpg_keys=" \
         0xB0F4253373F8F6F510D42178520A9993A1C052F8 \
         251A28DE2685AED4 \
@@ -102,12 +89,12 @@ RUN set -ex ; \
     cd /tmp ; \
     curl \
         -fSL \
-        http://nginx.org/download/nginx-$nginx_version.tar.gz \
+        http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz \
         -o nginx.tar.gz \
     ; \
     curl \
         -fSL \
-        http://nginx.org/download/nginx-$nginx_version.tar.gz.asc \
+        http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz.asc \
         -o nginx.tar.gz.asc \
     ; \
     curl \
@@ -142,7 +129,7 @@ RUN set -ex ; \
         nginx.tar.gz \
     ; \
     \
-    cd /tmp/nginx-$nginx_version ; \
+    cd /tmp/nginx-$NGINX_VERSION ; \
     ./configure $config ; \
     make -j$(getconf _NPROCESSORS_ONLN) ; \
     make install ; \
@@ -160,7 +147,7 @@ RUN set -ex ; \
     strip /usr/lib/nginx/modules/*.so ; \
     rm -rf \
         /tmp/naxsi-$NAXSI_VERSION \
-        /tmp/nginx-$nginx_version \
+        /tmp/nginx-$NGINX_VERSION \
     ; \
     \
     apk add --no-cache --virtual .build-deps gettext ; \

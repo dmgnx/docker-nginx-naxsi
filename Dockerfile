@@ -2,10 +2,10 @@ FROM alpine:3.5
 
 LABEL maintainer "Dimitri G. <dev@dmgnx.net>"
 
-ENV NAXSI_VERSION=0.55.3 \
-    NGINX_VERSION=@NGINX_VERSION@
-
 COPY ./docker-entrypoint.sh /docker-entrypoint.sh
+
+ENV NAXSI_VERSION=@NAXSI_VERSION@ \
+    NGINX_VERSION=@NGINX_VERSION@
 
 RUN set -ex ; \
     gpg_keys=" \

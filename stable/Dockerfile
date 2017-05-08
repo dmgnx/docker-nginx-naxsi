@@ -72,18 +72,18 @@ RUN set -ex ; \
     ; \
     \
     apk add --no-cache --virtual .build-deps \
+        curl \
         gcc \
+        gd-dev \
+        geoip-dev \
+        gnupg \
         libc-dev \
+        libxslt-dev \
+        linux-headers \
         make \
         openssl-dev \
         pcre-dev \
         zlib-dev \
-        linux-headers \
-        curl \
-        gnupg \
-        libxslt-dev \
-        gd-dev \
-        geoip-dev \
     ; \
     \
     cd /tmp ; \

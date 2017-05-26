@@ -1,4 +1,4 @@
-FROM alpine:3.5
+FROM alpine:3.6
 
 LABEL maintainer "Dimitri G. <dev@dmgnx.net>"
 
@@ -124,6 +124,7 @@ RUN set -ex ; \
     \
     tar -xzf naxsi.tar.gz ; \
     tar -xzf nginx.tar.gz ; \
+    \
     rm \
         naxsi.tar.gz \
         nginx.tar.gz \
@@ -145,6 +146,7 @@ RUN set -ex ; \
     ln -s ../../usr/lib/nginx/modules /etc/nginx/modules ; \
     strip /usr/sbin/nginx* ; \
     strip /usr/lib/nginx/modules/*.so ; \
+    \
     rm -rf \
         /tmp/naxsi-$NAXSI_VERSION \
         /tmp/nginx-$NGINX_VERSION \

@@ -1,3 +1,8 @@
+[![Docker Stars](https://img.shields.io/docker/stars/dmgnx/nginx-naxsi.svg)](https://hub.docker.com/r/dmgnx/nginx-naxsi/)
+[![Docker Pulls](https://img.shields.io/docker/pulls/dmgnx/nginx-naxsi.svg)](https://hub.docker.com/r/dmgnx/nginx-naxsi/)
+[![Docker Automated buil](https://img.shields.io/docker/automated/dmgnx/nginx-naxsi.svg)](https://hub.docker.com/r/dmgnx/nginx-naxsi/)
+
+
 # Supported tags and respective `Dockerfile` links
 
 -   [`1.13.0`, `1.13`, `mainline`, `latest` (*mainline/Dockerfile*)](https://github.com/dmgnx/docker-nginx-naxsi/blob/master/mainline/Dockerfile)

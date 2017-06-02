@@ -8,7 +8,7 @@ NGINX_STABLE_VERSION=1.12.0
 
 all: mainline stable
 
-mainline: Dockerfile
+mainline: | update Dockerfile
 	mkdir -p $@
 	sed \
 			-e 's/@NGINX_VERSION@/$(NGINX_MAINLINE_VERSION)/' \
@@ -19,7 +19,7 @@ mainline: Dockerfile
 	cp nginx.conf $@
 	cp nginx.vh.default.conf $@
 
-stable: Dockerfile
+stable: | update Dockerfile
 	mkdir -p $@
 	sed \
 			-e 's/@NGINX_VERSION@/$(NGINX_STABLE_VERSION)/' \
@@ -36,3 +36,7 @@ update:
 		-e 's/^\(NGINX_MAINLINE_VERSION=\)\([0-9]\+\(\.\|$$\)\)\+/\1$(NGINX_MAINLINE_VERSION)/' \
 		-e 's/^\(NGINX_STABLE_VERSION=\)\([0-9]\+\(\.\|$$\)\)\+/\1$(NGINX_STABLE_VERSION)/' \
 	   	Makefile
+	sed -i \
+		-e "s/\`$(shell grep '`mainline`' README.md | cut -d'`' -f2)\`/\`$(NGINX_MAINLINE_VERSION)\`/" \
+		-e "s/\`$(shell grep '`stable`' README.md | cut -d'`' -f2)\`/\`$(NGINX_STABLE_VERSION)\`/" \
+		README.md

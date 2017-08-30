@@ -5,7 +5,7 @@ LABEL maintainer "Dimitri G. <dev@dmgnx.net>"
 COPY ./docker-entrypoint.sh /docker-entrypoint.sh
 
 ENV NAXSI_VERSION=0.55.3 \
-    NGINX_VERSION=1.12.0
+    NGINX_VERSION=1.12.1
 
 RUN set -ex ; \
     gpg_keys=" \

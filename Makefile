@@ -1,14 +1,14 @@
 IMAGE=dmgnx/nginx-naxsi
 
 NAXSI_VERSION=0.55.3
-NGINX_MAINLINE_VERSION=1.13.1
+NGINX_MAINLINE_VERSION=1.13.3
 NGINX_STABLE_VERSION=1.12.0
 
 .PHONY:mainline stable
 
 all: mainline stable
 
-mainline: | update Dockerfile
+mainline: Dockerfile
 	mkdir -p $@
 	sed \
 			-e 's/@NGINX_VERSION@/$(NGINX_MAINLINE_VERSION)/' \
@@ -19,7 +19,7 @@ mainline: | update Dockerfile
 	cp nginx.conf $@
 	cp nginx.vh.default.conf $@
 
-stable: | update Dockerfile
+stable: Dockerfile
 	mkdir -p $@
 	sed \
 			-e 's/@NGINX_VERSION@/$(NGINX_STABLE_VERSION)/' \

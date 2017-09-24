@@ -110,7 +110,7 @@ RUN set -ex ; \
     \
     export GNUPGHOME="$(mktemp -d)" ; \
     gpg \
-        --keyserver "pgp.mit.edu" \
+        --keyserver "ha.pool.sks-keyservers.net" \
         --keyserver-options timeout=10 \
         --recv-keys $gpg_keys \
     ; \

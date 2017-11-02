@@ -5,8 +5,8 @@
 
 # Supported tags and respective `Dockerfile` links
 
--   [`1.13.5`, `1.13`, `mainline`, `latest` (*mainline/Dockerfile*)](https://github.com/dmgnx/docker-nginx-naxsi/blob/master/mainline/Dockerfile)
--   [`1.12.1`, `1.12`, `stable` (*stable/Dockerfile*)](https://github.com/dmgnx/docker-nginx-naxsi/blob/master/stable/Dockerfile)
+-   [`1.13.6`, `1.13`, `mainline`, `latest` (*mainline/Dockerfile*)](https://github.com/dmgnx/docker-nginx-naxsi/blob/master/mainline/Dockerfile)
+-   [`1.12.2`, `1.12`, `stable` (*stable/Dockerfile*)](https://github.com/dmgnx/docker-nginx-naxsi/blob/master/stable/Dockerfile)
 
 # How to use this image
 

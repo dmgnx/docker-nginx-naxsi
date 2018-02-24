@@ -116,7 +116,7 @@ RUN set -ex ; \
     ; \
     gpg --batch --verify nginx.tar.gz.asc nginx.tar.gz ; \
     gpg --batch --verify naxsi.tar.gz.asc naxsi.tar.gz ; \
-    rm -r \
+    rm -rf \
         "$GNUPGHOME" \
         naxsi.tar.gz.asc \
         nginx.tar.gz.asc \

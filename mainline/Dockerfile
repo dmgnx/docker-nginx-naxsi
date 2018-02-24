@@ -1,77 +1,72 @@
-FROM alpine:3.7
-
-LABEL maintainer "Dimitri G. <dev@dmgnx.net>"
+FROM alpine:3.7 as build
 
 COPY ./docker-entrypoint.sh /docker-entrypoint.sh
 
 ENV NAXSI_VERSION=0.55.3 \
     NGINX_VERSION=1.13.8
 
-RUN set -ex ; \
-    gpg_keys=" \
-        0xB0F4253373F8F6F510D42178520A9993A1C052F8 \
-        251A28DE2685AED4 \
-        " \
-    ; \
-    config=" \
-        --prefix=/etc/nginx \
-        --sbin-path=/usr/sbin/nginx \
-        --modules-path=/usr/lib/nginx/modules \
-        --conf-path=/etc/nginx/nginx.conf \
-        --error-log-path=/var/log/nginx/error.log \
-        --http-log-path=/var/log/nginx/access.log \
-        --pid-path=/var/run/nginx.pid \
-        --lock-path=/var/run/nginx.lock \
-        --http-client-body-temp-path=/var/cache/nginx/client_temp \
-        --http-proxy-temp-path=/var/cache/nginx/proxy_temp \
-        --http-fastcgi-temp-path=/var/cache/nginx/fastcgi_temp \
-        --http-uwsgi-temp-path=/var/cache/nginx/uwsgi_temp \
-        --http-scgi-temp-path=/var/cache/nginx/scgi_temp \
-        --user=nginx \
-        --group=nginx \
-        --add-module=/tmp/naxsi-$NAXSI_VERSION/naxsi_src/ \
-        --with-http_ssl_module \
-        --with-http_realip_module \
-        --with-http_addition_module \
-        --with-http_sub_module \
-        --with-http_dav_module \
-        --with-http_flv_module \
-        --with-http_mp4_module \
-        --with-http_gunzip_module \
-        --with-http_gzip_static_module \
-        --with-http_random_index_module \
-        --with-http_secure_link_module \
-        --with-http_stub_status_module \
-        --with-http_auth_request_module \
-        --with-http_xslt_module=dynamic \
-        --with-http_image_filter_module=dynamic \
-        --with-http_geoip_module=dynamic \
-        --with-threads \
-        --with-stream \
-        --with-stream_ssl_module \
-        --with-stream_ssl_preread_module \
-        --with-stream_realip_module \
-        --with-stream_geoip_module=dynamic \
-        --with-http_slice_module \
-        --with-mail \
-        --with-mail_ssl_module \
-        --with-compat \
-        --with-file-aio \
-        --with-http_v2_module \
-        " \
-    ; \
-    \
-    addgroup -S nginx ; \
-    adduser \
+ARG gpg_keys=" \
+      0xB0F4253373F8F6F510D42178520A9993A1C052F8 \
+      251A28DE2685AED4 \
+    "
+
+ARG nginx_config=" \
+      --prefix=/etc/nginx \
+      --sbin-path=/usr/sbin/nginx \
+      --modules-path=/usr/lib/nginx/modules \
+      --conf-path=/etc/nginx/nginx.conf \
+      --error-log-path=/var/log/nginx/error.log \
+      --http-log-path=/var/log/nginx/access.log \
+      --pid-path=/var/run/nginx.pid \
+      --lock-path=/var/run/nginx.lock \
+      --http-client-body-temp-path=/var/cache/nginx/client_temp \
+      --http-proxy-temp-path=/var/cache/nginx/proxy_temp \
+      --http-fastcgi-temp-path=/var/cache/nginx/fastcgi_temp \
+      --http-uwsgi-temp-path=/var/cache/nginx/uwsgi_temp \
+      --http-scgi-temp-path=/var/cache/nginx/scgi_temp \
+      --user=nginx \
+      --group=nginx \
+      --add-module=/tmp/naxsi-$NAXSI_VERSION/naxsi_src/ \
+      --with-http_ssl_module \
+      --with-http_realip_module \
+      --with-http_addition_module \
+      --with-http_sub_module \
+      --with-http_dav_module \
+      --with-http_flv_module \
+      --with-http_mp4_module \
+      --with-http_gunzip_module \
+      --with-http_gzip_static_module \
+      --with-http_random_index_module \
+      --with-http_secure_link_module \
+      --with-http_stub_status_module \
+      --with-http_auth_request_module \
+      --with-http_xslt_module=dynamic \
+      --with-http_image_filter_module=dynamic \
+      --with-http_geoip_module=dynamic \
+      --with-threads \
+      --with-stream \
+      --with-stream_ssl_module \
+      --with-stream_ssl_preread_module \
+      --with-stream_realip_module \
+      --with-stream_geoip_module=dynamic \
+      --with-http_slice_module \
+      --with-mail \
+      --with-mail_ssl_module \
+      --with-compat \
+      --with-file-aio \
+      --with-http_v2_module \
+    "
+
+RUN addgroup -S nginx
+RUN adduser \
         -D \
         -S \
         -h /var/cache/nginx \
         -s /sbin/nologin \
         -G nginx \
-        nginx \
-    ; \
-    \
-    apk add --no-cache --virtual .build-deps \
+        nginx
+
+RUN apk add --no-cache --virtual .build-deps \
         curl \
         gcc \
         gd-dev \
@@ -83,32 +78,31 @@ RUN set -ex ; \
         make \
         openssl-dev \
         pcre-dev \
-        zlib-dev \
-    ; \
-    \
-    cd /tmp ; \
-    curl \
+        zlib-dev
+
+WORKDIR /tmp
+
+RUN curl \
         -fSL \
         http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz \
-        -o nginx.tar.gz \
-    ; \
-    curl \
+        -o nginx.tar.gz
+
+RUN curl \
         -fSL \
         http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz.asc \
-        -o nginx.tar.gz.asc \
-    ; \
-    curl \
+        -o nginx.tar.gz.asc
+
+RUN curl \
         -fSL \
         https://github.com/nbs-system/naxsi/archive/$NAXSI_VERSION.tar.gz \
-        -o naxsi.tar.gz \
-    ; \
-    curl \
+        -o naxsi.tar.gz
+
+RUN curl \
         -fSL \
         https://github.com/nbs-system/naxsi/releases/download/$NAXSI_VERSION/naxsi-$NAXSI_VERSION.tar.gz.asc \
-        -o naxsi.tar.gz.asc \
-    ; \
-    \
-    export GNUPGHOME="$(mktemp -d)" ; \
+        -o naxsi.tar.gz.asc
+
+RUN export GNUPGHOME="$(mktemp -d)" ; \
     gpg \
         --keyserver "ha.pool.sks-keyservers.net" \
         --keyserver-options timeout=10 \
@@ -117,45 +111,46 @@ RUN set -ex ; \
     gpg --batch --verify nginx.tar.gz.asc nginx.tar.gz ; \
     gpg --batch --verify naxsi.tar.gz.asc naxsi.tar.gz ; \
     rm -rf \
-        "$GNUPGHOME" \
+        $GNUPGHOME \
         naxsi.tar.gz.asc \
-        nginx.tar.gz.asc \
-    ; \
-    \
-    tar -xzf naxsi.tar.gz ; \
-    tar -xzf nginx.tar.gz ; \
-    \
-    rm \
-        naxsi.tar.gz \
-        nginx.tar.gz \
-    ; \
-    \
-    cd /tmp/nginx-$NGINX_VERSION ; \
-    ./configure $config ; \
-    make -j$(getconf _NPROCESSORS_ONLN) ; \
-    make install ; \
-    rm -rf /etc/nginx/html/ ; \
-    mkdir /etc/nginx/conf.d/ ; \
-    mkdir -p /usr/share/nginx/html/ ; \
-    install -m644 \
+        nginx.tar.gz.asc
+
+RUN tar -xzf naxsi.tar.gz
+RUN tar -xzf nginx.tar.gz
+
+RUN rm \
+        /tmp/naxsi.tar.gz \
+        /tmp/nginx.tar.gz
+
+WORKDIR /tmp/nginx-$NGINX_VERSION
+
+RUN ./configure $nginx_config
+RUN make -j$(getconf _NPROCESSORS_ONLN)
+RUN make install
+
+RUN rm -rf /etc/nginx/html/
+RUN mkdir /etc/nginx/conf.d/
+RUN mkdir -p /usr/share/nginx/html/
+
+RUN install -m644 \
         ../naxsi-$NAXSI_VERSION/naxsi_config/naxsi_core.rules \
-        /etc/nginx \
-    ; \
-    install -m644 html/index.html /usr/share/nginx/html/ ; \
-    install -m644 html/50x.html /usr/share/nginx/html/ ; \
-    ln -s ../../usr/lib/nginx/modules /etc/nginx/modules ; \
-    strip /usr/sbin/nginx* ; \
-    strip /usr/lib/nginx/modules/*.so ; \
-    \
-    rm -rf \
+        /etc/nginx
+RUN install -m644 html/index.html /usr/share/nginx/html/
+RUN install -m644 html/50x.html /usr/share/nginx/html/
+
+RUN ln -s ../../usr/lib/nginx/modules /etc/nginx/modules
+
+RUN strip /usr/sbin/nginx*
+RUN strip /usr/lib/nginx/modules/*.so
+
+RUN rm -rf \
         /tmp/naxsi-$NAXSI_VERSION \
-        /tmp/nginx-$NGINX_VERSION \
-    ; \
-    \
-    apk add --no-cache --virtual .build-deps gettext ; \
-    mv /usr/bin/envsubst /tmp/ ; \
-    \
-    run_deps="$( \
+        /tmp/nginx-$NGINX_VERSION
+
+RUN apk add --no-cache --virtual .build-deps gettext ;
+RUN mv /usr/bin/envsubst /tmp/ ;
+
+RUN run_deps="$( \
         scanelf \
                 --needed \
                 --nobanner \
@@ -168,15 +163,23 @@ RUN set -ex ; \
             | sort -u \
         )" \
     ; \
-    apk add --no-cache --virtual .nginx-run-deps $run_deps ; \
-    apk del .build-deps ; \
-    mv /tmp/envsubst /usr/local/bin/ ; \
-    \
-    ln -sf /dev/stdout /var/log/nginx/access.log ; \
-    ln -sf /dev/stderr /var/log/nginx/error.log ;
+    apk add --no-cache --virtual .nginx-run-deps $run_deps
+RUN apk del .build-deps
+RUN mv /tmp/envsubst /usr/local/bin/
+
+RUN ln -sf /dev/stdout /var/log/nginx/access.log
+RUN ln -sf /dev/stderr /var/log/nginx/error.log
 
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY nginx.vh.default.conf /etc/nginx/conf.d/default.conf
+
+############
+
+FROM scratch
+
+LABEL maintainer "Dimitri G. <dev@dmgnx.net>"
+
+COPY --from=build / /
 
 VOLUME "/etc/nginx/conf.d" \
        "/etc/nginx/naxsi" \

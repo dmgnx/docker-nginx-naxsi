@@ -1,18 +1,68 @@
-FROM alpine:3.7
+FROM alpine:3.7 AS nginx-naxsi-build
 
-LABEL maintainer "Dimitri G. <dev@dmgnx.net>"
-
-COPY ./docker-entrypoint.sh /docker-entrypoint.sh
+RUN set -ex ; \
+    addgroup -S nginx ; \
+    adduser \
+        -D \
+        -S \
+        -h /var/cache/nginx \
+        -s /sbin/nologin \
+        -G nginx \
+        nginx ;
 
 ENV NAXSI_VERSION=@NAXSI_VERSION@ \
     NGINX_VERSION=@NGINX_VERSION@
 
+WORKDIR /tmp
+
 RUN set -ex ; \
-    gpg_keys=" \
-        0xB0F4253373F8F6F510D42178520A9993A1C052F8 \
-        251A28DE2685AED4 \
-        " \
+    gpg_keys="\
+        0xB0F4253373F8F6F510D42178520A9993A1C052F8\
+        251A28DE2685AED4\
+        " ; \
+    apk add --no-cache --virtual .build-deps \
+        curl \
+        gnupg \
     ; \
+    curl \
+        -fSL \
+        http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz \
+        -o nginx.tar.gz \
+    ; \
+    curl \
+        -fSL \
+        http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz.asc \
+        -o nginx.tar.gz.asc \
+    ; \
+    curl \
+        -fSL \
+        https://github.com/nbs-system/naxsi/archive/$NAXSI_VERSION.tar.gz \
+        -o naxsi.tar.gz \
+    ; \
+    curl \
+        -fSL \
+        https://github.com/nbs-system/naxsi/releases/download/$NAXSI_VERSION/naxsi-$NAXSI_VERSION.tar.gz.asc \
+        -o naxsi.tar.gz.asc \
+    ; \
+    \
+    export GNUPGHOME="$(mktemp -d)" ; \
+    gpg \
+        --keyserver "ha.pool.sks-keyservers.net" \
+        --keyserver-options timeout=10 \
+        --recv-keys $gpg_keys \
+    ; \
+    gpg --batch --verify nginx.tar.gz.asc nginx.tar.gz ; \
+    gpg --batch --verify naxsi.tar.gz.asc naxsi.tar.gz ; \
+    rm -rf \
+        "$GNUPGHOME" \
+        naxsi.tar.gz.asc \
+        nginx.tar.gz.asc \
+    ; \
+    apk del .build-deps ;
+
+
+
+RUN set -ex ; \
     config=" \
         --prefix=/etc/nginx \
         --sbin-path=/usr/sbin/nginx \
@@ -61,22 +111,10 @@ RUN set -ex ; \
         " \
     ; \
     \
-    addgroup -S nginx ; \
-    adduser \
-        -D \
-        -S \
-        -h /var/cache/nginx \
-        -s /sbin/nologin \
-        -G nginx \
-        nginx \
-    ; \
-    \
     apk add --no-cache --virtual .build-deps \
-        curl \
         gcc \
         gd-dev \
         geoip-dev \
-        gnupg \
         libc-dev \
         libxslt-dev \
         linux-headers \
@@ -84,42 +122,6 @@ RUN set -ex ; \
         openssl-dev \
         pcre-dev \
         zlib-dev \
-    ; \
-    \
-    cd /tmp ; \
-    curl \
-        -fSL \
-        http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz \
-        -o nginx.tar.gz \
-    ; \
-    curl \
-        -fSL \
-        http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz.asc \
-        -o nginx.tar.gz.asc \
-    ; \
-    curl \
-        -fSL \
-        https://github.com/nbs-system/naxsi/archive/$NAXSI_VERSION.tar.gz \
-        -o naxsi.tar.gz \
-    ; \
-    curl \
-        -fSL \
-        https://github.com/nbs-system/naxsi/releases/download/$NAXSI_VERSION/naxsi-$NAXSI_VERSION.tar.gz.asc \
-        -o naxsi.tar.gz.asc \
-    ; \
-    \
-    export GNUPGHOME="$(mktemp -d)" ; \
-    gpg \
-        --keyserver "ha.pool.sks-keyservers.net" \
-        --keyserver-options timeout=10 \
-        --recv-keys $gpg_keys \
-    ; \
-    gpg --batch --verify nginx.tar.gz.asc nginx.tar.gz ; \
-    gpg --batch --verify naxsi.tar.gz.asc naxsi.tar.gz ; \
-    rm -r \
-        "$GNUPGHOME" \
-        naxsi.tar.gz.asc \
-        nginx.tar.gz.asc \
     ; \
     \
     tar -xzf naxsi.tar.gz ; \
@@ -130,7 +132,7 @@ RUN set -ex ; \
         nginx.tar.gz \
     ; \
     \
-    cd /tmp/nginx-$NGINX_VERSION ; \
+    cd nginx-$NGINX_VERSION ; \
     ./configure $config ; \
     make -j$(getconf _NPROCESSORS_ONLN) ; \
     make install ; \
@@ -177,6 +179,13 @@ RUN set -ex ; \
 
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY nginx.vh.default.conf /etc/nginx/conf.d/default.conf
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+
+
+FROM scratch
+LABEL maintainer "Dimitri G. <dev@dmgnx.net>"
+
+COPY --from=nginx-naxsi-build / /
 
 VOLUME "/etc/nginx/conf.d" \
        "/etc/nginx/naxsi" \

@@ -11,6 +11,7 @@ RUN set -ex ; \
         nginx ;
 
 ENV NAXSI_VERSION=@NAXSI_VERSION@ \
+    NAXSI_TAG=@NAXSI_TAG@ \
     NGINX_VERSION=@NGINX_VERSION@
 
 WORKDIR /tmp
@@ -41,8 +42,8 @@ RUN set -ex ; \
     ; \
     curl \
         -fSL \
-        https://github.com/nbs-system/naxsi/releases/download/$NAXSI_VERSION/naxsi-$NAXSI_VERSION.tar.gz.asc \
-        -o naxsi.tar.gz.asc \
+        https://github.com/nbs-system/naxsi/releases/download/$NAXSI_TAG/naxsi-$NAXSI_VERSION.tar.gz.sig \
+        -o naxsi.tar.gz.sig \
     ; \
     \
     export GNUPGHOME="$(mktemp -d)" ; \
@@ -52,10 +53,10 @@ RUN set -ex ; \
         --recv-keys $gpg_keys \
     ; \
     gpg --batch --verify nginx.tar.gz.asc nginx.tar.gz ; \
-    gpg --batch --verify naxsi.tar.gz.asc naxsi.tar.gz ; \
+    gpg --batch --verify naxsi.tar.gz.sig naxsi.tar.gz ; \
     rm -rf \
         "$GNUPGHOME" \
-        naxsi.tar.gz.asc \
+        naxsi.tar.gz.sig \
         nginx.tar.gz.asc \
     ; \
     apk del .build-deps ;

@@ -2,6 +2,7 @@
 [![Docker Pulls](https://img.shields.io/docker/pulls/dmgnx/nginx-naxsi.svg)](https://hub.docker.com/r/dmgnx/nginx-naxsi/)
 [![Docker Automated buil](https://img.shields.io/docker/automated/dmgnx/nginx-naxsi.svg)](https://hub.docker.com/r/dmgnx/nginx-naxsi/)
 
+**NOT MAINTAINED ANYMORE**
 
 # Supported tags and respective `Dockerfile` links
 

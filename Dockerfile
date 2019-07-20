@@ -1,4 +1,4 @@
-FROM alpine:3.7 AS nginx-naxsi-build
+FROM alpine:3.10.1 AS nginx-naxsi-build
 
 RUN set -ex ; \
     addgroup -S nginx ; \
@@ -113,9 +113,11 @@ RUN set -ex ; \
     ; \
     \
     apk add --no-cache --virtual .build-deps \
+        clang \
         gcc \
         gd-dev \
         geoip-dev \
+        gettext \
         libc-dev \
         libxslt-dev \
         linux-headers \
@@ -134,7 +136,7 @@ RUN set -ex ; \
     ; \
     \
     cd nginx-$NGINX_VERSION ; \
-    ./configure $config ; \
+    CC=clang CFLAGS=-Os ./configure $config ; \
     make -j$(getconf _NPROCESSORS_ONLN) ; \
     make install ; \
     rm -rf /etc/nginx/html/ ; \
@@ -155,7 +157,6 @@ RUN set -ex ; \
         /tmp/nginx-$NGINX_VERSION \
     ; \
     \
-    apk add --no-cache --virtual .build-deps gettext ; \
     mv /usr/bin/envsubst /tmp/ ; \
     \
     run_deps="$( \

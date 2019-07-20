@@ -2,12 +2,10 @@
 [![Docker Pulls](https://img.shields.io/docker/pulls/dmgnx/nginx-naxsi.svg)](https://hub.docker.com/r/dmgnx/nginx-naxsi/)
 [![Docker Automated buil](https://img.shields.io/docker/automated/dmgnx/nginx-naxsi.svg)](https://hub.docker.com/r/dmgnx/nginx-naxsi/)
 
-**NOT MAINTAINED ANYMORE**
-
 # Supported tags and respective `Dockerfile` links
 
--   [`0.56-1.15.0`, `0.56-1.15`, `mainline`, `latest` (*mainline/Dockerfile*)](https://github.com/dmgnx/docker-nginx-naxsi/blob/master/mainline/Dockerfile)
--   [`0.56-1.14.0`, `0.56-1.14`, `stable` (*stable/Dockerfile*)](https://github.com/dmgnx/docker-nginx-naxsi/blob/master/stable/Dockerfile)
+-   [`1.17.1-0.56`, `mainline`, `latest` (*mainline/Dockerfile*)](https://github.com/dmgnx/docker-nginx-naxsi/blob/master/mainline/Dockerfile)
+-   [`1.16.0-0.56`, `stable` (*stable/Dockerfile*)](https://github.com/dmgnx/docker-nginx-naxsi/blob/master/stable/Dockerfile)
 
 # How to use this image
 

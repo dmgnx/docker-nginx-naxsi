@@ -12,7 +12,7 @@ RUN set -ex ; \
 
 ENV NAXSI_VERSION=0.56 \
     NAXSI_TAG=untagged-afabfc163946baa8036f \
-    NGINX_VERSION=1.17.1
+    NGINX_VERSION=1.17.2
 
 WORKDIR /tmp
 
@@ -136,7 +136,7 @@ RUN set -ex ; \
     ; \
     \
     cd nginx-$NGINX_VERSION ; \
-    CC=clang CFLAGS=-Os ./configure $config ; \
+    CC=clang CFLAGS="-pipe -O" ./configure $config ; \
     make -j$(getconf _NPROCESSORS_ONLN) ; \
     make install ; \
     rm -rf /etc/nginx/html/ ; \

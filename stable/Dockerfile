@@ -136,7 +136,7 @@ RUN set -ex ; \
     ; \
     \
     cd nginx-$NGINX_VERSION ; \
-    CC=clang CFLAGS=-Os ./configure $config ; \
+    CC=clang CFLAGS="-pipe -O" ./configure $config ; \
     make -j$(getconf _NPROCESSORS_ONLN) ; \
     make install ; \
     rm -rf /etc/nginx/html/ ; \

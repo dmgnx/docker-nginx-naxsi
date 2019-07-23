@@ -2,8 +2,10 @@ IMAGE=dmgnx/nginx-naxsi
 
 NAXSI_VERSION=0.56
 NAXSI_TAG=untagged-afabfc163946baa8036f
-NGINX_MAINLINE_VERSION=1.17.1
+NGINX_MAINLINE_VERSION=1.17.2
 NGINX_STABLE_VERSION=1.16.0
+
+.PHONY: mainline stable
 
 dir/mainline: mainline
 	

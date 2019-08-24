@@ -14,13 +14,12 @@ $ docker run --name nginx-naxsi -p 80:80 \
     -v $(pwd):/usr/share/nginx/html -d dmgnx/nginx-naxsi
 ```
 
-This will start a nginx service with default configuration, serving current working directory as you website.
+This will start a nginx service with default configuration, serving current working directory as your website.
 
 # Volumes
 
--   /etc/nginx/conf.d : virtual hosts configuration
--   /etc/nginx/naxsi : your Naxsi rules
--   /etc/nginx/ssl : SSL certificates
--   /usr/share/nginx/html : web root directory
--   /var/log/nginx : log storage (default redirecting it to standard outputs)
-
+-   `/etc/nginx/conf.d` : virtual hosts configuration
+-   `/etc/nginx/naxsi` : your Naxsi rules
+-   `/etc/nginx/ssl` : SSL certificates
+-   `/usr/share/nginx/html` : web root directory
+-   `/var/log/nginx` : log storage (redirected to the standard outputs by default)

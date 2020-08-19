@@ -11,8 +11,7 @@ RUN set -ex ; \
         nginx ;
 
 ENV NAXSI_VERSION=0.56 \
-    NAXSI_TAG=untagged-afabfc163946baa8036f \
-    NGINX_VERSION=1.17.3
+    NGINX_VERSION=1.19.2
 
 WORKDIR /tmp
 
@@ -42,7 +41,7 @@ RUN set -ex ; \
     ; \
     curl \
         -fSL \
-        https://github.com/nbs-system/naxsi/releases/download/$NAXSI_TAG/naxsi-$NAXSI_VERSION.tar.gz.sig \
+        https://github.com/nbs-system/naxsi/releases/download/$NAXSI_VERSION/naxsi-$NAXSI_VERSION.tar.gz.asc  \
         -o naxsi.tar.gz.sig \
     ; \
     \
